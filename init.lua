@@ -99,6 +99,9 @@ vim.g.loaded_perl_provider = 0
 -- Set uv managed python provider
 vim.g.python3_host_prog = vim.fn.expand '~/.pyenv/shims/python3'
 
+-- NOTE: Needed for bufferline
+vim.opt.termguicolors = true
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -171,6 +174,11 @@ vim.o.scrolloff = 10
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
 vim.o.confirm = true
+
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.softtabstop = 4
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -385,7 +393,7 @@ require('lazy').setup({
           return vim.fn.executable 'make' == 1
         end,
       },
-      { 'nvim-telescope/telescope-ui-select.nvim' },
+      -- { 'nvim-telescope/telescope-ui-select.nvim' }, -- NOTE: Using snacks.input instead
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
@@ -423,15 +431,17 @@ require('lazy').setup({
         -- },
         -- pickers = {}
         extensions = {
-          ['ui-select'] = {
-            require('telescope.themes').get_dropdown(),
-          },
+          -- NOTE: using snacks.input instead
+          -- ['ui-select'] = {
+          --   require('telescope.themes').get_dropdown(),
+          -- },
         },
       }
 
+      -- NOTE: using snacks instead
       -- Enable Telescope extensions if they are installed
-      pcall(require('telescope').load_extension, 'fzf')
-      pcall(require('telescope').load_extension, 'ui-select')
+      -- pcall(require('telescope').load_extension, 'fzf')
+      -- pcall(require('telescope').load_extension, 'ui-select')
 
       -- NOTE: Commented Telescope Keymaps in favour of snacks
       -- See `:help telescope.builtin`
@@ -670,6 +680,7 @@ require('lazy').setup({
       --  When you add blink.cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
       local capabilities = require('blink.cmp').get_lsp_capabilities()
+      local vue_language_server = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server'
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -711,6 +722,46 @@ require('lazy').setup({
             },
           },
         },
+        vtsls = {
+          capabilities = capabilities,
+          init_options = {
+            plugins = {
+              {
+                name = '@vue/typescript-plugin',
+                location = vue_language_server,
+                languages = { 'vue' },
+              },
+            },
+          },
+          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+        },
+        emmet_language_server = {
+          filetypes = { 'html', 'css', 'javascriptreact', 'typescriptreact', 'vue' },
+          capabilities = capabilities,
+        },
+        html = {
+          filetypes = { 'html', 'ejs', 'vue' },
+          capabilities = capabilities,
+        },
+        cssls = {
+          filetypes = { 'css', 'vue', 'scss', 'less' },
+          capabilities = capabilities,
+        },
+        tailwindcss = {
+          capabilities = capabilities,
+        },
+        pyright = {
+          capabilities = capabilities,
+        },
+        gopls = {
+          capabilities = capabilities,
+        },
+        rust_analyzer = {
+          capabilities = capabilities,
+        },
+        clangd = {
+          capabilities = capabilities,
+        },
       }
 
       -- Ensure the servers and tools above are installed
@@ -739,7 +790,7 @@ require('lazy').setup({
           'cssls',
           'css_variables',
           'cssmodules_ls',
-          'emmet_ls',
+          'emmet_language_server',
           'gopls',
           'html',
           'lua_ls',
@@ -807,8 +858,6 @@ require('lazy').setup({
         typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         python = { 'black', 'isort', stop_after_first = true },
-        go = { 'gofmt', 'goimports' },
-        rust = { 'rustfmt' },
         c = { 'clang-format' },
         cpp = { 'clang-format' },
         html = { 'prettierd', 'prettier', stop_after_first = true },
@@ -898,6 +947,9 @@ require('lazy').setup({
         default = { 'lsp', 'path', 'snippets', 'lazydev' },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+        },
+        per_filetype = {
+          codecompanion = { 'codecompanion' },
         },
       },
 
@@ -996,6 +1048,7 @@ require('lazy').setup({
         'luadoc',
         'markdown',
         'markdown_inline',
+        'yaml',
         'query',
         'vim',
         'vimdoc',
